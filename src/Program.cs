@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<MyDbContext>(
-    options => options.UseNpgsql("Host=127.0.0.1; Port=5432; Database = BookDB; Trust Server Certificate = true; Username=ANYTHING; Password=ANYTHING"));
+    options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -16,12 +16,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.MapGet("/books", async (MyDbContext context) =>
-{
-    return await context.Books.ToListAsync();
-});
+app.MapGet("/books", async (MyDbContext context) => await context.Books.ToListAsync());
 
 app.MapPost("/books", async (MyDbContext context, Book book) =>
 {
@@ -36,6 +31,7 @@ app.MapPost("/books", async (MyDbContext context, Book book) =>
     }
     
 });
+
 app.MapPost("/authors", async (MyDbContext context, Author author) =>
 {
     try { 
@@ -48,24 +44,23 @@ app.MapPost("/authors", async (MyDbContext context, Author author) =>
         return Results.Problem(detail: e.Message);
     }
 });
-app.MapGet("/authors", async (MyDbContext context) =>
-{
-    return await context.Authors.ToListAsync();
-});
+
+app.MapGet("/authors", async (MyDbContext context) => await context.Authors.ToListAsync());
+
 app.MapPost("/seed", async (MyDbContext context) =>
 {
     await context.Authors.AddAsync(new Author
     {
         Name = "John Stuart Mill",
-        Description = "A brittish philosopher and author"
+        Description = "A british philosopher and author"
     });
     await context.SaveChangesAsync();
-    var Mill = await context.Authors.FirstOrDefaultAsync();
+    var mill = await context.Authors.FirstOrDefaultAsync();
     await context.Books.AddAsync(new Book
     {
         Title = "The wealth of nations",
         NumberOfTimesViewed = 10,
-        AuthorID = Mill.AuthorID
+        AuthorID = mill.AuthorID
     });
     await context.SaveChangesAsync();
     return Results.Ok();

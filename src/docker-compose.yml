@@ -1,0 +1,22 @@
+﻿version: '3.1'
+
+services:
+  book-api:
+    image: book-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://0.0.0.0:8000"
+  
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: "web"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "BookDB"
