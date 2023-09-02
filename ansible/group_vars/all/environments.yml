@@ -1,0 +1,6 @@
+app_path: app
+
+# roles
+
+pip_install_packages:
+  - name: docker 

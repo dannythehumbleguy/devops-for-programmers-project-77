@@ -1,8 +1,34 @@
 - hosts: all
   become: true
   gather_facts: yes
+
+  pre_tasks:
+    - name: Copy sources
+      ansible.builtin.copy:
+        src: templates/sources.list
+        dest: /etc/apt/sources.list
        
   roles:
     - role: geerlingguy.pip
 
   tasks:
+    - name: Creates app directory
+      ansible.builtin.file:
+        path: "{{ app_path }}"
+        state: directory
+
+    - name: Copy config
+      ansible.builtin.template:
+        src: templates/appsettings.Production.json
+        dest: "{{ app_path }}/appsettings.Production.json"
+
+    - name: Run book-api container    
+      community.docker.docker_container:
+        name: book-api
+        image: dannyhf/book-api:latest
+        restart_policy: always
+        state: started
+        ports:
+          - "3000:3000"
+        volumes:
+          - ./app/appsettings.Production.json:/app/appsettings.Production.json       
