@@ -4,14 +4,14 @@ services:
   book-api:
     image: book-api
     build:
-      context: .
+      context: ./src
       dockerfile: Dockerfile
     depends_on:
       - db
     ports:
       - "3000:3000"
     volumes:
-      - ${PWD}../ansible/templates/appsettings.Production.json:/app/appsettings.Production.json
+      - ./ansible/templates/appsettings.Production.json:/app/appsettings.Production.json
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://0.0.0.0:3000"
