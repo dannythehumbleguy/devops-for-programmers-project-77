@@ -5,8 +5,7 @@
   pre_tasks:
     - name: Update and upgrade apt packages
       ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 86400
        
   roles:
@@ -22,13 +21,15 @@
       ansible.builtin.template:
         src: templates/appsettings.Production.json
         dest: "{{ app_path }}/appsettings.Production.json"
+      register: book_api_config
 
     - name: Run book-api container    
       community.docker.docker_container:
-        name: book-apiex
-        image: dannyhf/book-api:latest
+        name: book-api
+        image: dannyhf/book-api:1.0
         restart_policy: always
         state: started
+        restart: "{{book_api_config.changed}}"
         ports:
           - "3000:3000"
         env:
