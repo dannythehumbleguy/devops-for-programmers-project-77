@@ -3,10 +3,11 @@
   gather_facts: yes
 
   pre_tasks:
-    - name: Copy sources
-      ansible.builtin.copy:
-        src: templates/sources.list
-        dest: /etc/apt/sources.list
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
        
   roles:
     - role: geerlingguy.pip
@@ -24,11 +25,14 @@
 
     - name: Run book-api container    
       community.docker.docker_container:
-        name: book-api
+        name: book-apiex
         image: dannyhf/book-api:latest
         restart_policy: always
         state: started
         ports:
           - "3000:3000"
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ASPNETCORE_URLS: "http://0.0.0.0:3000"
         volumes:
-          - ./app/appsettings.Production.json:/app/appsettings.Production.json       
+          - ./app/appsettings.Production.json:/app/appsettings.Production.json
