@@ -1,7 +1,19 @@
-variable "db_name" { }
-variable "db_user" { }
-variable "db_password" { sensitive = true }
-variable "ssh_key" { }
+variable "db_name" { 
+  default = "BookDB" 
+  type = string
+}
+variable "db_user" { 
+  default = "web"
+  type = string 
+}
+variable "db_password" { 
+  sensitive = true
+  type = string
+}
+variable "ssh_key" { 
+  sensitive = true
+  type = string
+}
 
 resource "yandex_vpc_network" "network" {
   name = "network"
@@ -75,7 +87,7 @@ resource "yandex_compute_instance" "dev1" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd80o2eikcn22b229tsa" // ubuntu 22.04 with docker
+      image_id = "fd8g5aftj139tv8u2mo1" // ubuntu 22.04
     }
   }
 
@@ -104,7 +116,7 @@ resource "yandex_compute_instance" "dev2" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd80o2eikcn22b229tsa" // ubuntu 22.04 with docker
+      image_id = "fd8g5aftj139tv8u2mo1" // ubuntu 22.04
     }
   }
 
