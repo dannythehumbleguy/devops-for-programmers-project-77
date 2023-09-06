@@ -14,6 +14,27 @@ variable "ssh_key" {
   sensitive = true
   type = string
 }
+variable "domain" { 
+  default = "dannycw.xyz."
+  type = string
+}
+variable "lb_ip" { 
+  default = "158.160.96.222"
+  type = string
+}
+variable "dns_zone_id" { 
+  default = "dnsca41e6el7euirf3ud"
+  type = string
+}
+variable "certificate_name" {
+  default = "webcert"
+  type = string
+}
+variable "folder_id" {
+  default = "b1gv4ctc2qlvoraa4gig"
+  type = string
+}
+
 
 resource "yandex_vpc_network" "network" {
   name = "network"
@@ -73,8 +94,20 @@ resource "yandex_mdb_postgresql_database" "db" {
   depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
 }
 
-resource "yandex_compute_instance" "dev1" {
+data "yandex_dns_zone" "dns_zone" {
+  dns_zone_id = var.dns_zone_id
+}
 
+resource "yandex_dns_recordset" "lb_dns_record" {
+  zone_id = data.yandex_dns_zone.dns_zone.id
+  name    = "${var.domain}"
+  type    = "A"
+  ttl     = 600
+  data    = ["${var.lb_ip}"]
+  depends_on = [ data.yandex_dns_zone.dns_zone ]
+}
+
+resource "yandex_compute_instance" "dev1" {
   name                      = "dev1"
   allow_stopping_for_update = true
   platform_id               = "standard-v3"
@@ -202,6 +235,13 @@ resource "yandex_alb_virtual_host" "virtual-host" {
   depends_on = [ yandex_alb_backend_group.backend-group, yandex_alb_http_router.router ]
 }   
 
+
+
+data "yandex_cm_certificate" "tls_certificate" {
+  folder_id = "${var.folder_id}"
+  name      = "${var.certificate_name}"
+}
+
 resource "yandex_alb_load_balancer" "l7-balancer" {
   name        = "l7-balancer"
   network_id  = yandex_vpc_network.network.id
@@ -218,13 +258,18 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
     endpoint {
       address {
         external_ipv4_address {
+          address = var.lb_ip
         }
       }
-      ports = [ 80 ] // port by which will be reachable LB 
+      ports = [ 443 ] // port by which will be reachable LB 
     }
-    http {
-      handler {
-        http_router_id = yandex_alb_http_router.router.id
+
+    tls {
+      default_handler {
+        certificate_ids = [ "${data.yandex_cm_certificate.tls_certificate.id}" ]
+        http_handler {
+          http_router_id = yandex_alb_http_router.router.id
+        }
       }
     }
   }
@@ -236,5 +281,9 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
     }
   }
 
-  depends_on = [ yandex_vpc_network.network, yandex_vpc_subnet.subnet, yandex_alb_http_router.router ]
+  depends_on = [ 
+    yandex_vpc_network.network, 
+    yandex_vpc_subnet.subnet, 
+    yandex_alb_http_router.router,
+    data.yandex_cm_certificate.tls_certificate  ]
 }

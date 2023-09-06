@@ -3,7 +3,7 @@ app_path: app
 db_name: "BookDB"
 db_port: "6432"
 db_user: "web"
-db_host: "c-c9qotqf7perdj028kn9f.ro.mdb.yandexcloud.net"
+db_host: "c-c9qcaahdqfo70u07t8cm.ro.mdb.yandexcloud.net"
 
 # roles
 pip_install_packages:
