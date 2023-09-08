@@ -34,7 +34,18 @@ variable "folder_id" {
   default = "b1gv4ctc2qlvoraa4gig"
   type = string
 }
-
+variable "internal_app_port" {
+  default = 3000
+  type = number
+}
+#variable "healthcheck_endpoint" {
+#  default     = "http://localhost:${tostring(var.internal_app_port)}/books"
+#  type = string
+#}
+variable "vm_image_id" {
+  default = "fd8g5aftj139tv8u2mo1" // ubuntu 22.04
+  type = string
+}
 
 resource "yandex_vpc_network" "network" {
   name = "network"
@@ -120,7 +131,7 @@ resource "yandex_compute_instance" "dev1" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd8g5aftj139tv8u2mo1" // ubuntu 22.04
+      image_id = var.vm_image_id
     }
   }
 
@@ -149,7 +160,7 @@ resource "yandex_compute_instance" "dev2" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd8g5aftj139tv8u2mo1" // ubuntu 22.04
+      image_id = var.vm_image_id
     }
   }
 
@@ -187,7 +198,7 @@ resource "yandex_alb_backend_group" "backend-group" {
   http_backend {
     name                   = "backend"
     weight                 = 1
-    port                   = 3000 // port by which LB is requesting a VM
+    port                   = var.internal_app_port // port by which LB is requesting a VM
     target_group_ids       = [ yandex_alb_target_group.target-group.id ]
     load_balancing_config {
       panic_threshold      = 90
@@ -281,4 +292,16 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
     yandex_alb_http_router.router,
     data.yandex_cm_certificate.tls_certificate  
     ]
+}
+
+resource "datadog_monitor" "http_check" {
+  name               = "HTTP Endpoint Check"
+  type               = "service check"
+  message            = "URL {{url}} is {{status}}. {{error}}. Please investigate."
+  escalation_message = "The URL is still {{status}}. Escalating."
+  tags               = ["service:http-check"]
+
+  query = <<-QUERY
+    "http.can_connect".over("url:healthcheck").by("http://localhost:${tostring(var.internal_app_port)}/books").count_by_status()
+  QUERY
 }

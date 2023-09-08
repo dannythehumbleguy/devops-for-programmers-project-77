@@ -15,6 +15,7 @@ destroy:
 
 vault:
 	echo "secret_db_password: $(dbpass)" > ansible/group_vars/all/vault.yml
+	echo "secret_datadog_api_key: $(ddkey)" >> group_vars/webservers/vault.yml
 	ansible-vault encrypt ansible/group_vars/all/vault.yml
 	echo "your vault password" > .vaultpassword
 

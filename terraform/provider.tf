@@ -4,10 +4,20 @@ terraform {
       source = "yandex-cloud/yandex"
       version = "0.97.0"
     }
+
+    datadog = {
+      source = "DataDog/datadog"
+    }
   }
 }
 
-
+variable "datadog_api_key" { sensitive = true }
+variable "datadog_app_key" { sensitive = true }
+provider "datadog" {
+  api_key = var.datadog_api_key
+  app_key = var.datadog_app_key
+  api_url = "https://api.us5.datadoghq.com/"
+}
 
 variable "yc_token" { sensitive = true }
 provider "yandex" {

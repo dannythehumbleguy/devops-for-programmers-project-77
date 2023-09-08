@@ -10,6 +10,8 @@
        
   roles:
     - role: geerlingguy.pip
+    - role: datadog.datadog
+      tags: datadog
 
   tasks:
     - name: Creates app directory
