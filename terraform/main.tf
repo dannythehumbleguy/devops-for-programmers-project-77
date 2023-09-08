@@ -94,18 +94,18 @@ resource "yandex_mdb_postgresql_database" "db" {
   depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
 }
 
-data "yandex_dns_zone" "dns_zone" {
-  dns_zone_id = var.dns_zone_id
-}
-
-resource "yandex_dns_recordset" "lb_dns_record" {
-  zone_id = data.yandex_dns_zone.dns_zone.id
-  name    = "${var.domain}"
-  type    = "A"
-  ttl     = 600
-  data    = ["${var.lb_ip}"]
-  depends_on = [ data.yandex_dns_zone.dns_zone ]
-}
+#data "yandex_dns_zone" "dns_zone" {
+#  dns_zone_id = var.dns_zone_id
+#}
+#
+#resource "yandex_dns_recordset" "lb_dns_record" {
+#  zone_id = data.yandex_dns_zone.dns_zone.id
+#  name    = "${var.domain}"
+#  type    = "A"
+#  ttl     = 600
+#  data    = ["${var.lb_ip}"]
+#  depends_on = [ data.yandex_dns_zone.dns_zone ]
+#}
 
 resource "yandex_compute_instance" "dev1" {
   name                      = "dev1"
@@ -183,11 +183,6 @@ resource "yandex_alb_target_group" "target-group" {
 
 resource "yandex_alb_backend_group" "backend-group" {
   name                     = "backend-group"
-  session_affinity {
-    connection {
-      source_ip = false
-    }
-  }
 
   http_backend {
     name                   = "backend"
@@ -203,7 +198,7 @@ resource "yandex_alb_backend_group" "backend-group" {
       healthy_threshold    = 10
       unhealthy_threshold  = 15 
       http_healthcheck {
-        path               = "/"
+        path               = "/books"
       }
     }
   }
@@ -237,10 +232,10 @@ resource "yandex_alb_virtual_host" "virtual-host" {
 
 
 
-data "yandex_cm_certificate" "tls_certificate" {
-  folder_id = "${var.folder_id}"
-  name      = "${var.certificate_name}"
-}
+#data "yandex_cm_certificate" "tls_certificate" {
+#  folder_id = "${var.folder_id}"
+#  name      = "${var.certificate_name}"
+#}
 
 resource "yandex_alb_load_balancer" "l7-balancer" {
   name        = "l7-balancer"
@@ -261,17 +256,23 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
           address = var.lb_ip
         }
       }
-      ports = [ 443 ] // port by which will be reachable LB 
+      ports = [ 80 ] // port by which will be reachable LB 
     }
 
-    tls {
-      default_handler {
-        certificate_ids = [ "${data.yandex_cm_certificate.tls_certificate.id}" ]
-        http_handler {
-          http_router_id = yandex_alb_http_router.router.id
-        }
+    http {
+      handler {
+        http_router_id = yandex_alb_http_router.router.id
       }
-    }
+    }    
+
+    #tls {
+    #  default_handler {
+    #    certificate_ids = [ "${data.yandex_cm_certificate.tls_certificate.id}" ]
+    #    http_handler {
+    #      http_router_id = yandex_alb_http_router.router.id
+    #    }
+    #  }
+    #}
   }
 
   log_options {
@@ -285,5 +286,6 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
     yandex_vpc_network.network, 
     yandex_vpc_subnet.subnet, 
     yandex_alb_http_router.router,
-    data.yandex_cm_certificate.tls_certificate  ]
+    #data.yandex_cm_certificate.tls_certificate  
+    ]
 }
