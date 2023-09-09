@@ -7,7 +7,7 @@ db_host: "c-c9qh7ersju49dsg1tbus.ro.mdb.yandexcloud.net"
 
 # roles
 datadog_site: "us5.datadoghq.com"
-datadog_api_key: "{{ secret_datadog_key }}"
+datadog_api_key: "{{ secret_datadog_api_key }}"
 
 pip_install_packages:
   - name: docker 

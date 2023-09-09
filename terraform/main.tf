@@ -301,7 +301,5 @@ resource "datadog_monitor" "http_check" {
   escalation_message = "The URL is still {{status}}. Escalating."
   tags               = ["service:http-check"]
 
-  query = <<-QUERY
-    "http.can_connect".over("url:healthcheck").by("http://localhost:${tostring(var.internal_app_port)}/books").count_by_status()
-  QUERY
+  query = "\"http.can_connect\".over(\"instance:main_page\",\"url:http://localhost:${var.internal_app_port}/books\").by(\"*\").last(2).count_by_status()"
 }

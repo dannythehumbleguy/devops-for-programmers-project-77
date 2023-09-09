@@ -15,12 +15,14 @@ destroy:
 
 vault:
 	echo "secret_db_password: $(dbpass)" > ansible/group_vars/all/vault.yml
-	echo "secret_datadog_api_key: $(ddkey)" >> group_vars/webservers/vault.yml
+	echo "secret_datadog_api_key: $(ddkey)" >> ansible/group_vars/all/vault.yml
 	ansible-vault encrypt ansible/group_vars/all/vault.yml
 	echo "your vault password" > .vaultpassword
 
 terraform:
 	echo 'yc_token = "<yandex cloud Auth0 Token>"' > secrets.auto.tfvars
 	echo 'db_password = "<BB user password>"' >> secrets.auto.tfvars
+	echo 'datadog_api_key = "<Datadog API key>"' >> secrets.auto.tfvars
+	echo 'datadog_app_key = "<Datadog Application key>"' >> secrets.auto.tfvars
 	echo 'ssh_key = "<ssh key for VM>"' >> secrets.auto.tfvars
 	terraform -chdir=terraform init
