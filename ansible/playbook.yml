@@ -1,13 +1,13 @@
 - hosts: all
   become: true
-  gather_facts: yes
+  gather_facts: true
 
   pre_tasks:
     - name: Update and upgrade apt packages
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 86400
-       
+
   roles:
     - role: geerlingguy.pip
       tags: book-api
