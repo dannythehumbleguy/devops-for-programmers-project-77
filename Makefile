@@ -1,5 +1,11 @@
-deploy:
+deploy-full:
 	ansible-playbook ansible/playbook.yml -i ansible/inventory.ini --vault-password-file .vaultpassword
+
+deploy-datadog:
+	ansible-playbook ansible/playbook.yml -i ansible/inventory.ini --tags "datadog" --vault-password-file .vaultpassword
+
+deploy-book-api:
+	ansible-playbook ansible/playbook.yml -i ansible/inventory.ini --tags "book-api"  --vault-password-file .vaultpassword
 
 docker:
 	ansible-playbook ansible/docker.yml -i ansible/inventory.ini --vault-password-file .vaultpassword

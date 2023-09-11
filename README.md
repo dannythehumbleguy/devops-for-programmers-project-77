@@ -20,16 +20,17 @@ make resources
 ```
 3. Run command with DB password which was in `terraform/secrets.auto.tfvars`.
 ```
-make vault dbpass=<DB password>
+make vault dbpass=<DB password> ddkey=<Datadog api key>
 ```
 4. Put entered password into `.vaultpassword`.
-5. Set up docker on VM's 
+5. Set up IP's of VM's in `ansible/inventory.ini` and Database Id in `ansible/group_vars/all/environments.yml`
+6. Set up docker on VM's 
 ```
 make docker
 ```
-6. Deploy to servers
+7. Deploy to servers
 ```
-make deploy
+make deploy-full
 ```
 
 ### Other commands 
@@ -40,4 +41,12 @@ make destroy
 * Bring up a application locally
 ```
 make local
+```
+* Deploy Datadog
+```
+make deploy-datadog
+```
+* Deploy Book API
+```
+make deploy-book-api
 ```

@@ -10,6 +10,8 @@
        
   roles:
     - role: geerlingguy.pip
+      tags: book-api
+
     - role: datadog.datadog
       tags: datadog
 
@@ -18,12 +20,14 @@
       ansible.builtin.file:
         path: "{{ app_path }}"
         state: directory
+      tags: book-api
 
     - name: Copy config
       ansible.builtin.template:
         src: templates/appsettings.Production.json
         dest: "{{ app_path }}/appsettings.Production.json"
       register: book_api_config
+      tags: book-api
 
     - name: Run book-api container    
       community.docker.docker_container:
@@ -39,3 +43,4 @@
           ASPNETCORE_URLS: "http://0.0.0.0:3000"
         volumes:
           - ./app/appsettings.Production.json:/app/appsettings.Production.json
+      tags: book-api

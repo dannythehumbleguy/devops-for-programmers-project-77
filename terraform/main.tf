@@ -1,59 +1,10 @@
-variable "db_name" { 
-  default = "BookDB" 
-  type = string
-}
-variable "db_user" { 
-  default = "web"
-  type = string 
-}
-variable "db_password" { 
-  sensitive = true
-  type = string
-}
-variable "ssh_key" { 
-  sensitive = true
-  type = string
-}
-variable "domain" { 
-  default = "dannycw.xyz."
-  type = string
-}
-variable "lb_ip" { 
-  default = "158.160.96.222"
-  type = string
-}
-variable "dns_zone_id" { 
-  default = "dnsca41e6el7euirf3ud"
-  type = string
-}
-variable "certificate_name" {
-  default = "webcert"
-  type = string
-}
-variable "folder_id" {
-  default = "b1gv4ctc2qlvoraa4gig"
-  type = string
-}
-variable "internal_app_port" {
-  default = 3000
-  type = number
-}
-#variable "healthcheck_endpoint" {
-#  default     = "http://localhost:${tostring(var.internal_app_port)}/books"
-#  type = string
-#}
-variable "vm_image_id" {
-  default = "fd8g5aftj139tv8u2mo1" // ubuntu 22.04
-  type = string
-}
-
 resource "yandex_vpc_network" "network" {
   name = "network"
 }
 
 resource "yandex_vpc_subnet" "subnet" {
   name           = "subnet"
-  zone           = "ru-central1-a"
+  zone           = var.yc_zone
   v4_cidr_blocks = ["192.168.10.0/24"]
   network_id     = "${yandex_vpc_network.network.id}"
 
@@ -84,7 +35,7 @@ resource "yandex_mdb_postgresql_cluster" "pgcluster" {
   }
 
   host {
-    zone      = "ru-central1-a"
+    zone      = var.yc_zone
     subnet_id = yandex_vpc_subnet.subnet.id
   }
 }
@@ -122,7 +73,7 @@ resource "yandex_compute_instance" "dev1" {
   name                      = "dev1"
   allow_stopping_for_update = true
   platform_id               = "standard-v3"
-  zone                      = "ru-central1-a"
+  zone                      = var.yc_zone
 
   resources {
     cores  = "2"
@@ -151,7 +102,7 @@ resource "yandex_compute_instance" "dev2" {
   name                      = "dev2"
   allow_stopping_for_update = true
   platform_id               = "standard-v3"
-  zone                      = "ru-central1-a"
+  zone                      = var.yc_zone
 
   resources {
     cores  = "2"
@@ -252,7 +203,7 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
 
   allocation_policy {
     location {
-      zone_id   = "ru-central1-a"
+      zone_id   = var.yc_zone
       subnet_id = yandex_vpc_subnet.subnet.id
     }
   }
@@ -273,7 +224,7 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
       default_handler {
         certificate_ids = [ "${data.yandex_cm_certificate.tls_certificate.id}" ]
         http_handler {
-          http_router_id = yandex_alb_http_router.router.id
+          http_router_id = yanvar.yc_zonedex_alb_http_router.router.id
         }
       }
     }
