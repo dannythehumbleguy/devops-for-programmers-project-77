@@ -29,7 +29,7 @@
       register: book_api_config
       tags: book-api
 
-    - name: Run book-api container    
+    - name: Run book-api container
       community.docker.docker_container:
         name: book-api
         image: dannyhf/book-api:1.0
