@@ -6,9 +6,9 @@ resource "yandex_vpc_subnet" "subnet" {
   name           = "subnet"
   zone           = var.yc_zone
   v4_cidr_blocks = ["192.168.10.0/24"]
-  network_id     = "${yandex_vpc_network.network.id}"
+  network_id     = yandex_vpc_network.network.id
 
-  depends_on = [ yandex_vpc_network.network ]
+  depends_on = [yandex_vpc_network.network]
 }
 
 resource "yandex_mdb_postgresql_cluster" "pgcluster" {
@@ -24,7 +24,7 @@ resource "yandex_mdb_postgresql_cluster" "pgcluster" {
       disk_size          = 15
     }
     postgresql_config = {
-      max_connections    = 100
+      max_connections = 100
     }
   }
 
@@ -61,12 +61,12 @@ data "yandex_dns_zone" "dns_zone" {
 }
 
 resource "yandex_dns_recordset" "lb_dns_record" {
-  zone_id = data.yandex_dns_zone.dns_zone.id
-  name    = "${var.domain}"
-  type    = "A"
-  ttl     = 600
-  data    = ["${var.lb_ip}"]
-  depends_on = [ data.yandex_dns_zone.dns_zone ]
+  zone_id    = data.yandex_dns_zone.dns_zone.id
+  name       = var.domain
+  type       = "A"
+  ttl        = 600
+  data       = ["${var.lb_ip}"]
+  depends_on = [data.yandex_dns_zone.dns_zone]
 }
 
 resource "yandex_compute_instance" "dev1" {
@@ -94,7 +94,7 @@ resource "yandex_compute_instance" "dev1" {
   metadata = {
     ssh-keys = "ubuntu:${var.ssh_key}"
   }
-  depends_on = [ yandex_vpc_subnet.subnet ]
+  depends_on = [yandex_vpc_subnet.subnet]
 }
 
 resource "yandex_compute_instance" "dev2" {
@@ -124,82 +124,82 @@ resource "yandex_compute_instance" "dev2" {
     ssh-keys = "ubuntu:${var.ssh_key}"
   }
 
-  depends_on = [ yandex_vpc_subnet.subnet ]
+  depends_on = [yandex_vpc_subnet.subnet]
 }
 
 resource "yandex_alb_target_group" "target-group" {
-  name           = "target-group"
+  name = "target-group"
 
   target {
-    subnet_id    = yandex_vpc_subnet.subnet.id
-    ip_address   = yandex_compute_instance.dev1.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.subnet.id
+    ip_address = yandex_compute_instance.dev1.network_interface.0.ip_address
   }
 
   target {
-    subnet_id    = yandex_vpc_subnet.subnet.id
-    ip_address   = yandex_compute_instance.dev2.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.subnet.id
+    ip_address = yandex_compute_instance.dev2.network_interface.0.ip_address
   }
 
-  depends_on = [ yandex_compute_instance.dev1, yandex_compute_instance.dev2 ]
+  depends_on = [yandex_compute_instance.dev1, yandex_compute_instance.dev2]
 }
 
 resource "yandex_alb_backend_group" "backend-group" {
-  name                     = "backend-group"
+  name = "backend-group"
 
   http_backend {
-    name                   = "backend"
-    weight                 = 1
-    port                   = var.internal_app_port // port by which LB is requesting a VM
-    target_group_ids       = [ yandex_alb_target_group.target-group.id ]
+    name             = "backend"
+    weight           = 1
+    port             = var.internal_app_port // port by which LB is requesting a VM
+    target_group_ids = [yandex_alb_target_group.target-group.id]
     load_balancing_config {
-      panic_threshold      = 90
-    }    
+      panic_threshold = 90
+    }
     healthcheck {
-      timeout              = "10s"
-      interval             = "2s"
-      healthy_threshold    = 10
-      unhealthy_threshold  = 15 
+      timeout             = "10s"
+      interval            = "2s"
+      healthy_threshold   = 10
+      unhealthy_threshold = 15
       http_healthcheck {
-        path               = "/books"
+        path = "/books"
       }
     }
   }
 
-  depends_on = [ yandex_alb_target_group.target-group ]
+  depends_on = [yandex_alb_target_group.target-group]
 }
 
 resource "yandex_alb_http_router" "router" {
-  name          = "router"
-  labels        = {
+  name = "router"
+  labels = {
     tf-label    = "tf-label-value"
     empty-label = ""
   }
 }
 
 resource "yandex_alb_virtual_host" "virtual-host" {
-  name                    = "virtual-host"
-  http_router_id          = yandex_alb_http_router.router.id
+  name           = "virtual-host"
+  http_router_id = yandex_alb_http_router.router.id
   route {
-    name                  = "route"
+    name = "route"
     http_route {
       http_route_action {
-        backend_group_id  = yandex_alb_backend_group.backend-group.id
-        timeout           = "60s"
+        backend_group_id = yandex_alb_backend_group.backend-group.id
+        timeout          = "60s"
       }
     }
   }
 
-  depends_on = [ yandex_alb_backend_group.backend-group, yandex_alb_http_router.router ]
-}   
+  depends_on = [yandex_alb_backend_group.backend-group, yandex_alb_http_router.router]
+}
 
 data "yandex_cm_certificate" "tls_certificate" {
-  folder_id = "${var.folder_id}"
-  name      = "${var.certificate_name}"
+  folder_id = var.folder_id
+  name      = var.certificate_name
 }
 
 resource "yandex_alb_load_balancer" "l7-balancer" {
-  name        = "l7-balancer"
-  network_id  = yandex_vpc_network.network.id
+  name       = "l7-balancer"
+  network_id = yandex_vpc_network.network.id
 
   allocation_policy {
     location {
@@ -216,13 +216,13 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
           address = var.lb_ip
         }
       }
-      ports = [ 443 ] // port by which will be reachable LB 
+      ports = [443] // port by which will be reachable LB 
     }
- 
+
 
     tls {
       default_handler {
-        certificate_ids = [ "${data.yandex_cm_certificate.tls_certificate.id}" ]
+        certificate_ids = ["${data.yandex_cm_certificate.tls_certificate.id}"]
         http_handler {
           http_router_id = yandex_alb_http_router.router.id
         }
@@ -233,16 +233,16 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
   log_options {
     discard_rule {
       http_code_intervals = ["HTTP_2XX", "HTTP_5XX"]
-      discard_percent = 75
+      discard_percent     = 75
     }
   }
 
-  depends_on = [ 
-    yandex_vpc_network.network, 
-    yandex_vpc_subnet.subnet, 
+  depends_on = [
+    yandex_vpc_network.network,
+    yandex_vpc_subnet.subnet,
     yandex_alb_http_router.router,
-    data.yandex_cm_certificate.tls_certificate  
-    ]
+    data.yandex_cm_certificate.tls_certificate
+  ]
 }
 
 resource "datadog_monitor" "http_check" {
