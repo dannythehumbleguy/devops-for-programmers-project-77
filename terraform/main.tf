@@ -224,7 +224,7 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
       default_handler {
         certificate_ids = [ "${data.yandex_cm_certificate.tls_certificate.id}" ]
         http_handler {
-          http_router_id = yanvar.yc_zonedex_alb_http_router.router.id
+          http_router_id = yandex_alb_http_router.router.id
         }
       }
     }
