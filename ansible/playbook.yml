@@ -35,7 +35,7 @@
         image: dannyhf/book-api:1.0
         restart_policy: always
         state: started
-        restart: "{{book_api_config.changed}}"
+        restart: "{{ book_api_config.changed }}"
         ports:
           - "3000:3000"
         env:
