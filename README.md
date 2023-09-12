@@ -18,9 +18,12 @@ make terraform-sercrets
 ```
 make resources
 ```
-3. Run command with DB password which was in `terraform/secrets.auto.tfvars`.
+3. Run command with your credentials.
 ```
-make vault dbpass=<DB password> ddkey=<Datadog api key>
+make vault db_pass=<DB password> \
+	   dd_api_key=<Datadog API key> \
+	   dd_app_key=<Datadog Application key> \
+	   yc_token=<Yandex clound Auth0 token>
 ```
 4. Put entered password into `.vaultpassword`.
 5. Set up IP's of VM's in `ansible/inventory.ini` and Database Id in `ansible/group_vars/all/environments.yml`

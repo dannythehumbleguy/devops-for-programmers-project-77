@@ -40,10 +40,15 @@ resource "yandex_mdb_postgresql_cluster" "pgcluster" {
   }
 }
 
+data "ansiblevault_path" "db_password" {
+  path = var.ansible_vault_path
+  key  = "secret_db_password"
+}
+
 resource "yandex_mdb_postgresql_user" "dbuser" {
   cluster_id = yandex_mdb_postgresql_cluster.pgcluster.id
   name       = var.db_user
-  password   = var.db_password
+  password   = data.ansiblevault_path.db_password
   depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
 }
 

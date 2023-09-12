@@ -6,10 +6,6 @@ variable "db_user" {
   default = "web"
   type    = string
 }
-variable "db_password" {
-  sensitive = true
-  type      = string
-}
 variable "ssh_key" {
   sensitive = true
   type      = string
@@ -46,3 +42,8 @@ variable "yc_zone" {
   default = "ru-central1-a"
   type    = string
 }
+variable "ansible_vault_path" {
+  default = "../ansible/group_vars/all/vault.yaml"
+  type    = string
+}
+

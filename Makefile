@@ -20,8 +20,10 @@ destroy:
 	terraform -chdir=terraform destroy
 
 vault:
-	echo "secret_db_password: $(dbpass)" > ansible/group_vars/all/vault.yml
-	echo "secret_datadog_api_key: $(ddkey)" >> ansible/group_vars/all/vault.yml
+	echo 'secret_db_password: "$(db_pass)"' > ansible/group_vars/all/vault.yml
+	echo 'secret_datadog_api_key: "$(dd_api_key)"' >> ansible/group_vars/all/vault.yml
+	echo 'sercet_datadog_app_key: "$(dd_app_key)"' >> ansible/group_vars/all/vault.yml
+	echo 'sercet_yc_token: "$(yc_token)"' >> ansible/group_vars/all/vault.yml
 	ansible-vault encrypt ansible/group_vars/all/vault.yml
 	echo "your vault password" > .vaultpassword
 
