@@ -48,8 +48,8 @@ data "ansiblevault_path" "db_password" {
 resource "yandex_mdb_postgresql_user" "dbuser" {
   cluster_id = yandex_mdb_postgresql_cluster.pgcluster.id
   name       = var.db_user
-  password   = data.ansiblevault_path.db_password
-  depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
+  password   = data.ansiblevault_path.db_password.value
+  depends_on = [yandex_mdb_postgresql_cluster.pgcluster, data.ansiblevault_path.db_password]
 }
 
 resource "yandex_mdb_postgresql_database" "db" {
@@ -97,7 +97,7 @@ resource "yandex_compute_instance" "dev1" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${var.ssh_key}"
+    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
   }
   depends_on = [yandex_vpc_subnet.subnet]
 }
@@ -126,7 +126,7 @@ resource "yandex_compute_instance" "dev2" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${var.ssh_key}"
+    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
   }
 
   depends_on = [yandex_vpc_subnet.subnet]
@@ -253,9 +253,27 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
 resource "datadog_monitor" "http_check" {
   name               = "HTTP Endpoint Check"
   type               = "service check"
-  message            = "URL {{url}} is {{status}}. {{error}}. Please investigate."
-  escalation_message = "The URL is still {{status}}. Escalating."
+  message            = "API is down!"
   tags               = ["service:http-check"]
 
   query = "\"http.can_connect\".over(\"instance:main_page\",\"url:http://localhost:${var.internal_app_port}/books\").by(\"*\").last(2).count_by_status()"
+}
+
+resource "local_file" "ansible_vars" {
+  content = templatefile("templates/terraform-outputs.tftpl", { pgcluster_id = yandex_mdb_postgresql_cluster.pgcluster.id })
+  filename = "../ansible/group_vars/all/terraform-outputs.yml"
+  depends_on = [ yandex_mdb_postgresql_cluster.pgcluster ]
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("templates/inventory.tftpl", 
+    { 
+      dev1_ip = yandex_compute_instance.dev1.network_interface[0].nat_ip_address,
+      dev2_ip = yandex_compute_instance.dev2.network_interface[0].nat_ip_address 
+    })
+  filename = "../ansible/inventory.ini"
+  depends_on = [ 
+    yandex_compute_instance.dev1, 
+    yandex_compute_instance.dev2 
+    ]
 }

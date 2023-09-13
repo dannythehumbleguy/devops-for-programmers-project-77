@@ -1,8 +1,8 @@
 # This is automatically by Terraform with terraform/templates/inventory.tftpl
 
 [webservers]
-dev1 ansible_host=158.160.121.122
-dev2 ansible_host=158.160.121.143
+dev1 ansible_host=${dev1_ip}
+dev2 ansible_host=${dev2_ip}
 
 [webservers:vars]
 ansible_user=ubuntu
