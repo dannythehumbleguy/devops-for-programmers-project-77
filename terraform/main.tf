@@ -253,9 +253,22 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
 resource "datadog_monitor" "http_check" {
   name               = "HTTP Endpoint Check"
   type               = "service check"
-  message            = "URL {{url}} is {{status}}. {{error}}. Please investigate."
-  escalation_message = "The URL is still {{status}}. Escalating."
+  message            = "API is down!"
   tags               = ["service:http-check"]
 
   query = "\"http.can_connect\".over(\"instance:main_page\",\"url:http://localhost:${var.internal_app_port}/books\").by(\"*\").last(2).count_by_status()"
+}
+
+resource "local_file" "ansible_vars" {
+  content = templatefile("templates/terraform-outputs.tftpl", { pgcluster_id = yandex_mdb_postgresql_cluster.pgcluster.id })
+  filename = "../ansible/group_vars/all/terraform-outputs.yml"
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("templates/inventory.tftpl", 
+    { 
+      dev1_ip = yandex_compute_instance.dev1.network_interface[0].nat_ip_address,
+      dev2_ip = yandex_compute_instance.dev2.network_interface[0].nat_ip_address 
+    })
+  filename = "../ansible/inventory.ini"
 }

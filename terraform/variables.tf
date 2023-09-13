@@ -43,7 +43,6 @@ variable "yc_zone" {
   type    = string
 }
 variable "ansible_vault_path" {
-  default = "../ansible/group_vars/all/vault.yaml"
+  default = "../ansible/group_vars/all/vault.yml"
   type    = string
 }
-

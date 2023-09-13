@@ -20,7 +20,6 @@ data "ansiblevault_path" "yc_token" {
   path = var.ansible_vault_path
   key  = "secret_yc_token"
 }
-variable "yc_token" { sensitive = true }
 provider "yandex" {
   token     = data.ansiblevault_path.yc_token
   cloud_id  = "b1gtk8bi8ed21l2l3aui"
@@ -36,15 +35,12 @@ data "ansiblevault_path" "datadog_app_key" {
   path = var.ansible_vault_path
   key  = "secret_datadog_app_key"
 }
-variable "datadog_api_key" { sensitive = true }
-variable "datadog_app_key" { sensitive = true }
 provider "datadog" {
   api_key = data.ansiblevault_path.datadog_api_key
   app_key = data.ansiblevault_path.datadog_app_key
   api_url = "https://api.us5.datadoghq.com/"
 }
-
 provider "ansiblevault" {
-  vault_path = ".vaultpassword"
+  vault_pass = "helloworld123123"
   root_folder = "../ansible"
 }

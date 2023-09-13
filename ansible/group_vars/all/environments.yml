@@ -3,7 +3,6 @@ app_path: app
 db_name: "BookDB"
 db_port: "6432"
 db_user: "web"
-db_host: "c-c9qb1396i4gm60ropm4q.ro.mdb.yandexcloud.net"
 
 # roles
 datadog_site: "us5.datadoghq.com"
