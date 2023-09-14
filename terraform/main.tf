@@ -97,7 +97,8 @@ resource "yandex_compute_instance" "dev1" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+    //ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}" I'd line that varsion
+    ssh-keys = "ubuntu:${var.ssh_key}"
   }
   depends_on = [yandex_vpc_subnet.subnet]
 }
@@ -126,7 +127,7 @@ resource "yandex_compute_instance" "dev2" {
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "ubuntu:${var.ssh_key}"
   }
 
   depends_on = [yandex_vpc_subnet.subnet]

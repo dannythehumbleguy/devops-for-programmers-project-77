@@ -6,10 +6,10 @@ variable "db_user" {
   default = "web"
   type    = string
 }
-//variable "ssh_key" {
-//  sensitive = true
-//  type      = string
-//}
+variable "ssh_key" {
+  sensitive = true
+  type      = string
+}
 variable "domain" {
   default = "dannycw.xyz."
   type    = string
