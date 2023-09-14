@@ -2,12 +2,13 @@
 [![Actions Status](https://github.com/dannycyberwalker/devops-for-programmers-project-77/workflows/hexlet-check/badge.svg)](https://github.com/dannycyberwalker/devops-for-programmers-project-77/actions)
 
 ### [API Status](https://statuspage.freshping.io/67786-Nothing)
+### [Get books endpoint](https://dannycw.xyz/books)
 
 ### Pre conditions
 1. User system requirements: 
     * Ansible 
     * Trerraform CLI
-	* openssl
+    * openssl
 2. Log in to Terraform by CLI [(Guide)](https://developer.hashicorp.com/terraform/tutorials/cloud-get-started/cloud-login/).
 
 ### Guide to deploy
