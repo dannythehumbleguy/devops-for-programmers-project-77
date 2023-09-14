@@ -41,6 +41,6 @@ provider "datadog" {
   api_url = "https://api.us5.datadoghq.com/"
 }
 provider "ansiblevault" {
-  vault_path = "../.vaultpassword"
+  vault_path  = "../.vaultpassword"
   root_folder = "../ansible"
 }
