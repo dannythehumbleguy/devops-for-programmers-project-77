@@ -12,20 +12,20 @@
 2. Log in to Terraform by CLI [(Guide)](https://developer.hashicorp.com/terraform/tutorials/cloud-get-started/cloud-login/).
 
 ### Guide to deploy
-1. Run command below for initializing terraform.
-```
-make terraform
-```
-2. Allocate resources
-```
-make resources
-```
-3. Run command with your credentials. Your vault password will be in `.vaultpassword` file. 
+1. Run command with your credentials. Your vault password will be in `.vaultpassword` file. 
 ```
 make vault db_pass=<DB password> \
 	   dd_api_key=<Datadog API key> \
 	   dd_app_key=<Datadog Application key> \
 	   yc_token=<Yandex clound Auth0 token>
+```
+2. Run command below for initializing terraform.
+```
+make terraform
+```
+3. Allocate resources
+```
+make resources
 ```
 4. Set up docker on VM's 
 ```
