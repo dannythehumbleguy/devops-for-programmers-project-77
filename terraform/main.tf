@@ -93,9 +93,9 @@ resource "yandex_compute_instance" "dev1" {
   }
 
   lifecycle {
-    ignore_changes = [ 
+    ignore_changes = [
       boot_disk[0].initialize_params[0].image_id
-     ]
+    ]
   }
 
   depends_on = [yandex_vpc_subnet.subnet]
@@ -129,9 +129,9 @@ resource "yandex_compute_instance" "dev2" {
   }
 
   lifecycle {
-    ignore_changes = [ 
+    ignore_changes = [
       boot_disk[0].initialize_params[0].image_id
-     ]
+    ]
   }
 
   depends_on = [yandex_vpc_subnet.subnet]
@@ -277,15 +277,15 @@ resource "datadog_monitor" "http_check" {
 }
 
 resource "local_file" "ansible_vars" {
-  content    = templatefile("templates/terraform-outputs.tftpl", 
+  content = templatefile("templates/terraform-outputs.tftpl",
     {
-      pgcluster_fqdn = yandex_mdb_postgresql_cluster.pgcluster.host[0].fqdn,
-      datadog_host = var.datadog_host,
+      pgcluster_fqdn         = yandex_mdb_postgresql_cluster.pgcluster.host[0].fqdn,
+      datadog_host           = var.datadog_host,
       external_book_api_port = var.external_book_api_port,
       internal_book_api_port = var.internal_book_api_port
-      db_name = var.db_name
-      db_user = var.db_user
-    })
+      db_name                = var.db_name
+      db_user                = var.db_user
+  })
   filename   = "../ansible/group_vars/all/terraform-outputs.yml"
   depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
 }

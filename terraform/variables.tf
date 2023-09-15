@@ -40,13 +40,13 @@ variable "ansible_vault_path" {
 }
 variable "datadog_host" {
   default = "us5.datadoghq.com"
-  type = string
+  type    = string
 }
 variable "external_book_api_port" {
   default = 3000
-  type = number
+  type    = number
 }
 variable "internal_book_api_port" {
   default = 3000
-  type = number
+  type    = number
 }
