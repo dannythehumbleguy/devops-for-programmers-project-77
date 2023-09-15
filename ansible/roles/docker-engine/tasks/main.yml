@@ -1,7 +1,6 @@
-
 - name: Install dependencies
   apt:
-    name: 
+    name:
       - apt-transport-https
       - ca-certificates
       - curl
@@ -9,7 +8,7 @@
       - software-properties-common
     state: present
     update_cache: yes
-    
+
 - name: Add GPG
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -20,13 +19,13 @@
     state: present
 - name: Install docker
   apt:
-    name: 
+    name:
       - docker-ce
       - docker-ce-cli
-      - containerd.io        
+      - containerd.io
     state: latest
     update_cache: yes
-        
+
 - name: Check docker service status
   service:
     name: docker
