@@ -1,7 +1,8 @@
-@host = 158.160.32.86
+#@host = 158.160.32.86:3000
+@host = "dannycw.xyz"
 
-POST http://{{host}}:3000/seed HTTP/1.1
+POST https://{{host}}/seed HTTP/1.1
 
 ###
 
-GET http://{{host}}:3000/books HTTP/1.1
+GET https://{{host}}/books HTTP/1.1

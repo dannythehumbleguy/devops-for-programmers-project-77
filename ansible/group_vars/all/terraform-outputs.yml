@@ -1,0 +1,9 @@
+  # This is automatically by Terraform with terraform/templates/terraform-outputs.tftpl
+
+terraform_db_host: "rc1a-0tpumue3yxckd2wm.mdb.yandexcloud.net"
+terrform_db_name: "BookDB"
+terraform_db_user: "web"
+
+terraform_datadog_host: "us5.datadoghq.com"
+terraform_external_book_api_port: "3000"
+terraform_internal_book_api_port: "3000"

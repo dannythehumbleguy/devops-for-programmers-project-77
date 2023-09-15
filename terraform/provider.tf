@@ -30,8 +30,8 @@ data "ansiblevault_path" "yc_folder_id" {
 }
 provider "yandex" {
   token     = data.ansiblevault_path.yc_token.value
-  cloud_id  = data.ansiblevault_path.yc_cloud_id
-  folder_id = data.ansiblevault_path.yc_folder_id
+  cloud_id  = data.ansiblevault_path.yc_cloud_id.value
+  folder_id = data.ansiblevault_path.yc_folder_id.value
   zone      = var.yc_zone
 }
 
