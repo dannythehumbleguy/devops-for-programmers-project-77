@@ -29,11 +29,7 @@ make terraform
 ```
 make resources
 ```
-4. Set up docker on VM's 
-```
-make docker
-```
-5. Deploy to servers
+4. Deploy to servers
 ```
 make deploy-full
 ```
@@ -47,11 +43,15 @@ make destroy
 ```
 make local
 ```
-* Deploy Datadog
+* Set up or update Datadog
 ```
-make deploy-datadog
+make datadog
 ```
 * Deploy Book API
 ```
 make deploy-book-api
+```
+* Set up Docker
+```
+make docker
 ```
