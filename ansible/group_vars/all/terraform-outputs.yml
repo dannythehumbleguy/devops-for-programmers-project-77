@@ -1,3 +1,0 @@
-  # This is automatically by Terraform with terraform/templates/terraform-outputs.tftpl
-
-  db_host: "c-c9qpqmsfsv8c59e4esvh.ro.mdb.yandexcloud.net"

@@ -24,7 +24,9 @@ make resources
 make vault db_pass=<DB password> \
 	   dd_api_key=<Datadog API key> \
 	   dd_app_key=<Datadog Application key> \
-	   yc_token=<Yandex clound Auth0 token>
+	   yc_token=<Yandex clound Auth0 token> \
+	   yc_cloud_id=<Yandex cloud id> \
+	   yc_folder_id=<Yandex account folder id>
 ```
 4. Set up docker on VM's 
 ```

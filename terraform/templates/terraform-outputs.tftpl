@@ -1,3 +1,9 @@
   # This is automatically by Terraform with terraform/templates/terraform-outputs.tftpl
 
-  db_host: "c-${pgcluster_id}.ro.mdb.yandexcloud.net"
+terraform_db_host: "${pgcluster_fqdn}"
+terrform_db_name: "${db_name}"
+terraform_db_user: "${db_user}"
+
+terraform_datadog_host: "${datadog_host}"
+terraform_external_book_api_port: "${external_book_api_port}"
+terraform_internal_book_api_port: "${internal_book_api_port}"

@@ -61,17 +61,8 @@ resource "yandex_mdb_postgresql_database" "db" {
   depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
 }
 
-data "yandex_dns_zone" "dns_zone" {
-  dns_zone_id = var.dns_zone_id
-}
-
-resource "yandex_dns_recordset" "lb_dns_record" {
-  zone_id    = data.yandex_dns_zone.dns_zone.id
-  name       = var.domain
-  type       = "A"
-  ttl        = 600
-  data       = ["${var.lb_ip}"]
-  depends_on = [data.yandex_dns_zone.dns_zone]
+data "yandex_compute_image" "ubuntu_image" {
+  family = "ubuntu-2204-lts"
 }
 
 resource "yandex_compute_instance" "dev1" {
@@ -87,7 +78,7 @@ resource "yandex_compute_instance" "dev1" {
 
   boot_disk {
     initialize_params {
-      image_id = var.vm_image_id
+      image_id = data.yandex_compute_image.ubuntu_image.id
     }
   }
 
@@ -100,6 +91,13 @@ resource "yandex_compute_instance" "dev1" {
     //ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}" I'd line that varsion
     ssh-keys = "ubuntu:${var.ssh_key}"
   }
+
+  lifecycle {
+    ignore_changes = [ 
+      boot_disk[0].initialize_params[0].image_id
+     ]
+  }
+
   depends_on = [yandex_vpc_subnet.subnet]
 }
 
@@ -117,7 +115,7 @@ resource "yandex_compute_instance" "dev2" {
 
   boot_disk {
     initialize_params {
-      image_id = var.vm_image_id
+      image_id = data.yandex_compute_image.ubuntu_image.id
     }
   }
 
@@ -128,6 +126,12 @@ resource "yandex_compute_instance" "dev2" {
 
   metadata = {
     ssh-keys = "ubuntu:${var.ssh_key}"
+  }
+
+  lifecycle {
+    ignore_changes = [ 
+      boot_disk[0].initialize_params[0].image_id
+     ]
   }
 
   depends_on = [yandex_vpc_subnet.subnet]
@@ -155,7 +159,7 @@ resource "yandex_alb_backend_group" "backend-group" {
   http_backend {
     name             = "backend"
     weight           = 1
-    port             = var.internal_app_port // port by which LB is requesting a VM
+    port             = var.external_book_api_port // port by which LB is requesting a VM
     target_group_ids = [yandex_alb_target_group.target-group.id]
     load_balancing_config {
       panic_threshold = 90
@@ -219,7 +223,6 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
     endpoint {
       address {
         external_ipv4_address {
-          address = var.lb_ip
         }
       }
       ports = [443] // port by which will be reachable LB 
@@ -251,17 +254,38 @@ resource "yandex_alb_load_balancer" "l7-balancer" {
   ]
 }
 
+data "yandex_dns_zone" "dns_zone" {
+  dns_zone_id = var.dns_zone_id
+}
+
+resource "yandex_dns_recordset" "lb_dns_record" {
+  zone_id    = data.yandex_dns_zone.dns_zone.id
+  name       = var.domain
+  type       = "A"
+  ttl        = 600
+  data       = ["${yandex_alb_load_balancer.l7-balancer.listener[0].endpoint[0].address[0].external_ipv4_address[0].address}"]
+  depends_on = [data.yandex_dns_zone.dns_zone, yandex_alb_load_balancer.l7-balancer]
+}
+
 resource "datadog_monitor" "http_check" {
   name    = "HTTP Endpoint Check"
   type    = "service check"
   message = "API is down!"
   tags    = ["service:http-check"]
 
-  query = "\"http.can_connect\".over(\"instance:main_page\",\"url:http://localhost:${var.internal_app_port}/books\").by(\"*\").last(2).count_by_status()"
+  query = "\"http.can_connect\".over(\"instance:main_page\",\"url:http://localhost:${var.internal_book_api_port}/books\").by(\"*\").last(2).count_by_status()"
 }
 
 resource "local_file" "ansible_vars" {
-  content    = templatefile("templates/terraform-outputs.tftpl", { pgcluster_id = yandex_mdb_postgresql_cluster.pgcluster.id })
+  content    = templatefile("templates/terraform-outputs.tftpl", 
+    {
+      pgcluster_fqdn = yandex_mdb_postgresql_cluster.pgcluster.host[0].fqdn,
+      datadog_host = var.datadog_host,
+      external_book_api_port = var.external_book_api_port,
+      internal_book_api_port = var.internal_book_api_port
+      db_name = var.db_name
+      db_user = var.db_user
+    })
   filename   = "../ansible/group_vars/all/terraform-outputs.yml"
   depends_on = [yandex_mdb_postgresql_cluster.pgcluster]
 }

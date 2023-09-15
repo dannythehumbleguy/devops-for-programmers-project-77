@@ -37,10 +37,10 @@
         state: started
         restart: "{{ book_api_config.changed }}"
         ports:
-          - "3000:3000"
+          - "{{ terraform_external_book_api_port }}:{{ internal_book_api_port }}"
         env:
           ASPNETCORE_ENVIRONMENT: Production
-          ASPNETCORE_URLS: "http://0.0.0.0:3000"
+          ASPNETCORE_URLS: "http://0.0.0.0:{{ internal_book_api_port }}"
         volumes:
           - ./app/appsettings.Production.json:/app/appsettings.Production.json
       tags: book-api
