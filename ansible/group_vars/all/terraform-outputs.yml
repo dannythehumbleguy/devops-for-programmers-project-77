@@ -1,6 +1,6 @@
   # This is automatically by Terraform with terraform/templates/terraform-outputs.tftpl
 
-terraform_db_host: "rc1a-0tpumue3yxckd2wm.mdb.yandexcloud.net"
+terraform_db_host: "rc1a-z69ey0iplkw98dqg.mdb.yandexcloud.net"
 terrform_db_name: "BookDB"
 terraform_db_user: "web"
 
