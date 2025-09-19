@@ -10,11 +10,9 @@ builder.Services.AddDbContext<MyDbContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger(); 
+app.UseSwaggerUI();
+
 
 app.MapGet("/books", async (MyDbContext context) => await context.Books.ToListAsync());
 
@@ -65,5 +63,19 @@ app.MapPost("/seed", async (MyDbContext context) =>
     await context.SaveChangesAsync();
     return Results.Ok();
 });
+
+try
+{
+    using var scope = app.Services.CreateScope();
+    
+    var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+    await db.Database.MigrateAsync();
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogWarning(ex, "Failed to initialize webhook on startup. Check your configuration.");
+}
+
 
 app.Run();

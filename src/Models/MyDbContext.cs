@@ -6,7 +6,6 @@ public class MyDbContext : DbContext
 {
     public MyDbContext(DbContextOptions<MyDbContext> options): base(options)
     {
-        Database.Migrate();
     }
     
     public DbSet<Book> Books { get; set; }
